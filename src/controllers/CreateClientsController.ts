@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { CreateClientsService, ListClients } from "../services/CreateClientsService";
+import { CreateClientsService, ListClients, DeleteClientsService } from "../services/CreateClientsService";
 
 class CreateClientsController{
     async handle(request: FastifyRequest, reply: FastifyReply){
@@ -23,4 +23,16 @@ class ListClient{
     }
 }
 
-export {CreateClientsController, ListClient}
+class DeleteClients{
+    async handle3(request: FastifyRequest, reply: FastifyReply){
+        const { id } = request.params as { id: string };
+
+        const deleteService = new DeleteClientsService()
+
+        const client = await deleteService.execute3({id: Number(id)})
+
+        reply.send(client)
+    }
+}
+
+export {CreateClientsController, ListClient, DeleteClients}
