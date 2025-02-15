@@ -11,11 +11,11 @@ export async function routes(fastify: FastifyInstance, options: FastifyPluginOpt
     })
 
     fastify.get("/customers",async (resquest: FastifyRequest, reply: FastifyReply) =>{
-        return new ListClient().handle2(resquest, reply)
+        return new ListClient().handle(resquest, reply)
     })
 
     fastify.delete("/customer/:id",async (resquest: FastifyRequest, reply: FastifyReply) =>{
-        return new DeleteClients().handle3(resquest, reply)
+        return new DeleteClients().handle(resquest, reply)
     })
 
 }

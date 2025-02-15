@@ -1,37 +1,62 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { CreateClientsService, ListClients, DeleteClientsService } from "../services/CreateClientsService";
+import { ERROR_REQUIRED_FIELDS, ERROR_NOT_FOUND, ERROR_INVALID_ID, SUCCESS_CREATED_ITEM, SUCCESS_DELETED_ITEM, ERROR_INTERNAL_SERVER_DB, ERROR_INTERNAL_SERVER } from "../../modulo/config";
 
 class CreateClientsController{
     async handle(request: FastifyRequest, reply: FastifyReply){
         const {nome, email, senha} = request.body as {nome: string, email: string, senha: string}
 
-        const customerService = new CreateClientsService()
+        if (!nome || !email || !senha) {
+            return reply.send(ERROR_REQUIRED_FIELDS);
+        }
+
+        try {
+
+         const customerService = new CreateClientsService()
 
         const customer = await customerService.execute({nome, email, senha})
 
-        reply.send(customer)
+        return reply.send({...SUCCESS_CREATED_ITEM, customer});
+
+        } catch (error) {
+            return reply.send(ERROR_INTERNAL_SERVER);
+        }
+        
     }
 }
 
 class ListClient{
-    async handle2(request: FastifyRequest, reply: FastifyReply){
-        const listCustomerService = new ListClients()
+    async handle(request: FastifyRequest, reply: FastifyReply){
 
-        const customer = await listCustomerService.execute2()
+        try {
+            const listCustomerService = new ListClients()
 
-        reply.send(customer)
+        const customer = await listCustomerService.execute()
+
+       return reply.status(200).send(customer)
+        } catch (error) {
+            return reply.send(ERROR_INTERNAL_SERVER_DB)
+        }
+
+        
     }
 }
 
 class DeleteClients{
-    async handle3(request: FastifyRequest, reply: FastifyReply){
+    async handle(request: FastifyRequest, reply: FastifyReply){
         const { id } = request.params as { id: string };
 
-        const deleteService = new DeleteClientsService()
+        try {
+            const deleteService = new DeleteClientsService()
 
-        const client = await deleteService.execute3({id: Number(id)})
+        const client = await deleteService.execute({id: Number(id)})
 
-        reply.send(client)
+        return reply.send({...SUCCESS_DELETED_ITEM,client})
+        } catch (error) {
+            return reply.send(ERROR_NOT_FOUND)
+        }
+
+        
     }
 }
 
