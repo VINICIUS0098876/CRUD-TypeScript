@@ -9,6 +9,7 @@ import {
   ListClient,
   DeleteClients,
   ResetPassword,
+  LoginUser,
 } from "./controllers/CreateClientsController";
 import prismaClient from "./prisma";
 import { ERROR_NOT_FOUND } from "./modulo/config";
@@ -66,5 +67,13 @@ export async function routes(
       return reply.send({ message: `Token de recuperação gerado para ${email}: ${token}` });
     }
   );
+
+  fastify.post(
+    "/login",
+    async (resquest: FastifyRequest, reply: FastifyReply) => {
+      return new LoginUser().handle(resquest, reply);
+    }
+  );
+
 
 }

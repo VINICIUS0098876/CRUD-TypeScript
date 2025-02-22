@@ -3,7 +3,8 @@ import {
   CreateClientsService,
   ListClients,
   DeleteClientsService,
-  RedefinirSenha
+  RedefinirSenha,
+  Login
 } from "../services/CreateClientsService";
 import {
   ERROR_REQUIRED_FIELDS,
@@ -13,10 +14,11 @@ import {
   SUCCESS_DELETED_ITEM,
   ERROR_INTERNAL_SERVER_DB,
   ERROR_INTERNAL_SERVER,
+  ERROR_INVALID_CREDENTIALS,
 } from "../modulo/config";
 
 // Inserir Clientes
-class CreateClientsController {
+export class CreateClientsController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { nome, email, senha } = request.body as {
       nome: string;
@@ -41,7 +43,7 @@ class CreateClientsController {
 }
 
 //Listar Clientes
-class ListClient {
+export class ListClient {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     try {
       const listCustomerService = new ListClients();
@@ -56,7 +58,7 @@ class ListClient {
 }
 
 // Deletar Clientes
-class DeleteClients {
+export class DeleteClients {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
 
@@ -91,4 +93,23 @@ export class ResetPassword{
   }
 }
 
-export { CreateClientsController, ListClient, DeleteClients };
+export class LoginUser{
+  async handle(resquest: FastifyRequest, reply: FastifyReply){
+    const {email, senha} = resquest.body as {email: string, senha: string}
+
+    if(!email || !senha){
+      return reply.send(ERROR_REQUIRED_FIELDS)
+    }
+
+    try {
+      const loginService = new Login()
+
+      const token = await loginService.execute(email, senha)
+
+      return reply.send({message: 'Login bem sucedido!', token})
+    } catch (error) {
+      return reply.send(ERROR_INVALID_CREDENTIALS)
+    }
+
+  }
+}

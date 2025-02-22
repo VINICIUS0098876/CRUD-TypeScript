@@ -2,7 +2,7 @@ import { error } from "console";
 import prismaClient from "../prisma";
 import  Jwt  from "jsonwebtoken";
 import bcrypt from "bcrypt"
-import { ERROR_INTERNAL_SERVER_DB } from "../modulo/config";
+import { ERROR_INTERNAL_SERVER_DB, ERROR_NOT_FOUND } from "../modulo/config";
 
 interface CreateClients {
   nome: string;
@@ -15,7 +15,7 @@ interface DeleteClients {
 }
 
 // Inserir Cliente
-class CreateClientsService {
+export class CreateClientsService {
   async execute({ nome, email, senha }: CreateClients) {
     try {
       if (!nome || !email || !senha) {
@@ -24,11 +24,12 @@ class CreateClientsService {
         );
       }
 
+      const hashedPassword = await bcrypt.hash(senha,10)
       const customer = await prismaClient.tbl_usuarios.create({
         data: {
           nome,
           email,
-          senha,
+          senha: hashedPassword,
         },
       });
 
@@ -43,7 +44,7 @@ class CreateClientsService {
 
 
 // Listar Cliente
-class ListClients {
+export class ListClients {
   async execute() {
     try {
       const customer = await prismaClient.tbl_usuarios.findMany();
@@ -59,7 +60,7 @@ class ListClients {
 
 
 // Deletar Cliente
-class DeleteClientsService {
+export class DeleteClientsService {
   async execute({ id }: DeleteClients) {
     try {
       if (!id) {
@@ -132,4 +133,33 @@ export class RedefinirSenha{
     }
   }
 }
-export { CreateClientsService, ListClients, DeleteClientsService };
+
+export class Login{
+  async execute(email: string, senha: string){
+    const user = await prismaClient.tbl_usuarios.findUnique({
+      where: {email}
+    })
+
+    if(!user){
+      throw new Error('Usuário não encontrado!')
+    }
+
+    if (!user.senha) {
+      throw new Error('Credenciais Inválidas!')
+    }
+
+    const senhaValidacao = await bcrypt.compare(senha, user.senha)
+
+    if(!senhaValidacao){
+      throw new Error('Credenciais Inválidas!')
+    }
+
+    const token = Jwt.sign({email: user.email, id: user.id_usuario}, SECRET_KEY, {
+      expiresIn: 604800
+    })
+    return token
+  }
+}
+
+
+

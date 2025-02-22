@@ -33,6 +33,12 @@ export const ERROR_INTERNAL_SERVER = {
   message:
     "Não foi possível processar a requisição, devido a um erro na camada de negócio/controle da aplicação. Contate o administrador da API!!",
 };
+export const ERROR_INVALID_CREDENTIALS = {
+  status: false,
+  status_code: 401,
+  message:
+    "Credenciais de autenticação incorretas!!",
+};
 
 // Mensagens de Sucesso
 export const SUCCESS_CREATED_ITEM = {
