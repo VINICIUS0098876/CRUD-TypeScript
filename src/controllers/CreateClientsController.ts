@@ -4,7 +4,9 @@ import {
   ListClients,
   DeleteClientsService,
   RedefinirSenha,
-  Login
+  Login,
+  SECRET_KEY,
+  Perfil
 } from "../services/CreateClientsService";
 import {
   ERROR_REQUIRED_FIELDS,
@@ -16,6 +18,7 @@ import {
   ERROR_INTERNAL_SERVER,
   ERROR_INVALID_CREDENTIALS,
 } from "../modulo/config";
+import  Jwt  from "jsonwebtoken";
 
 // Inserir Clientes
 export class CreateClientsController {
@@ -104,12 +107,42 @@ export class LoginUser{
     try {
       const loginService = new Login()
 
-      const token = await loginService.execute(email, senha)
+      const {token, nome} = await loginService.execute(email, senha)
 
-      return reply.send({message: 'Login bem sucedido!', token})
+      return reply.send({message: 'Login bem sucedido!', token, nome})
     } catch (error) {
       return reply.send(ERROR_INVALID_CREDENTIALS)
     }
+
+  }
+}
+
+export class PerfilUser{
+  async handle(request: FastifyRequest, reply: FastifyReply){
+    try {
+
+      // 1. Obtendo o token do cabeçalho da requisição 
+      const authHeader = request.headers.authorization
+      if(!authHeader){
+        return reply.send(ERROR_INVALID_CREDENTIALS)
+      }
+
+      // 2. Extraindo o token 
+      const token = authHeader.split(" ")[1]
+
+      // 3. verificando e decodificando o token 
+      const decoded = Jwt.verify(token, SECRET_KEY) as {id_usuario: number}
+
+      // 4. Chamando o service para busacar os dados do usuario
+      const profile = new Perfil()
+      const userData = await profile.execute(decoded.id_usuario)
+
+      // 5. Retornando os dados do usuario
+      return reply.send(userData)
+    } catch (error) {
+      return reply.status(401).send("Token inválido ou expirado!")
+    }
+    
 
   }
 }

@@ -154,10 +154,28 @@ export class Login{
       throw new Error('Credenciais Inválidas!')
     }
 
-    const token = Jwt.sign({email: user.email, id: user.id_usuario}, SECRET_KEY, {
+    const token = Jwt.sign({email: user.email, id_usuario: user.id_usuario}, SECRET_KEY, {
       expiresIn: 604800
     })
-    return token
+    return {token, nome: user.nome}
+  }
+}
+
+export class Perfil{
+  async execute(id_usuario: number){
+    const user = prismaClient.tbl_usuarios.findUnique({
+      where: {id_usuario},
+      select: {
+        email: true,
+        nome: true
+      }
+    })
+
+    if(!user){
+      throw new Error("Usuário não encontrado!")
+    }
+
+    return user
   }
 }
 

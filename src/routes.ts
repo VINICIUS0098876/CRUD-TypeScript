@@ -10,6 +10,7 @@ import {
   DeleteClients,
   ResetPassword,
   LoginUser,
+  PerfilUser,
 } from "./controllers/CreateClientsController";
 import prismaClient from "./prisma";
 import { ERROR_NOT_FOUND } from "./modulo/config";
@@ -75,5 +76,11 @@ export async function routes(
     }
   );
 
+  fastify.get(
+    "/customer/perfil",
+    async (resquest: FastifyRequest, reply: FastifyReply) => {
+      return new PerfilUser().handle(resquest, reply);
+    }
+  );
 
 }
