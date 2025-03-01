@@ -145,7 +145,7 @@ export class Login{
     }
 
     if (!user.senha) {
-      throw new Error('Credenciais Inválidas!')
+      throw new Error('Senha não cadastrada!')
     }
 
     const senhaValidacao = await bcrypt.compare(senha, user.senha)
@@ -166,6 +166,7 @@ export class Perfil{
     const user = prismaClient.tbl_usuarios.findUnique({
       where: {id_usuario},
       select: {
+        id_usuario: true,
         email: true,
         nome: true
       }
